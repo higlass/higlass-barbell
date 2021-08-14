@@ -1,7 +1,7 @@
 {
-  "name": "higlass-arcs",
-  "version": "0.3.3",
-  "description": "Arc tracks for HiGlass",
+  "name": "higlass-barbell",
+  "version": "0.1.0",
+  "description": "Barbell track for higlass",
   "keywords": [
     "HiGlass",
     "Track"
@@ -20,10 +20,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/higlass/higlass-arcs.git"
+    "url": "git://github.com/higlass/higlass-barbell.git"
   },
-  "main": "dist/higlass-arcs.min.js",
-  "unpkg": "dist/higlass-arcs.min.js",
+  "main": "dist/higlass-barbell.min.js",
+  "unpkg": "dist/higlass-barbell.min.js",
   "files": [
     "src",
     "dist"
