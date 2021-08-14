@@ -59,6 +59,9 @@
   },
   "dependencies": {
     "@flekschas/utils": "^0.27.0",
-    "higlass-register": "^0.3.0"
+    "box-intersect": "^1.0.2",
+    "buffer": "^6.0.3",
+    "higlass-register": "^0.3.0",
+    "robust-point-in-polygon": "^1.0.3"
   }
 }
