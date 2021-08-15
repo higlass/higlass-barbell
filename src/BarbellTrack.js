@@ -566,7 +566,7 @@ class BarbellTrackClass extends HGC.tracks.HorizontalTiled1DPixiTrack {
           xEndPos,
           yStartPos,
           (rectY + rectHeight / 2) * this.prevK,
-          
+
           1,
           geneInfo[5],
         );
@@ -1062,73 +1062,8 @@ BarbellTrack.config = {
   name: 'Barbell',
   thumbnail: new DOMParser().parseFromString(icon, 'text/xml').documentElement,
   availableOptions: [
-    'arcStyle',
-    'completelyContained',
-    'flip1D',
-    'labelPosition',
-    'labelColor',
-    'labelTextOpacity',
-    'labelBackgroundOpacity',
-    'strokeColor',
-    'strokeOpacity',
-    'strokeWidth',
-    'trackBorderWidth',
-    'trackBorderColor',
-    'startField',
-    'endField',
-    'filter',
   ],
   defaultOptions: {
-    arcStyle: 'ellipse',
-    completelyContained: false,
-    flip1D: 'no',
-    labelColor: 'black',
-    labelPosition: 'hidden',
-    strokeColor: 'black',
-    strokeOpacity: 1,
-    strokeWidth: 1,
-    trackBorderWidth: 0,
-    trackBorderColor: 'black',
   },
-  optionsInfo: {
-    arcStyle: {
-      name: 'Arc Style',
-      inlineOptions: {
-        circle: {
-          name: 'Circle',
-          value: 'circle',
-        },
-        ellipse: {
-          name: 'Ellipse',
-          value: 'ellipse',
-        },
-      },
-    },
-    completelyContained: {
-      name: 'Only whole interactions',
-      inlineOptions: {
-        yes: {
-          name: 'Yes',
-          value: true,
-        },
-        no: {
-          name: 'No',
-          value: false,
-        },
-      },
-    },
-    flip1D: {
-      name: 'Flip vertically',
-      inlineOptions: {
-        yes: {
-          name: 'Yes',
-          value: 'yes',
-        },
-        no: {
-          name: 'No',
-          value: 'no',
-        },
-      },
-    },
-  },
+  optionsInfo: {},
 };
