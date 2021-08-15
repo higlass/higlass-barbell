@@ -1,4 +1,4 @@
-# Arcs Track for HiGlass
+# Barbell Track for HiGlass
 
 > Display BEDPE data as barbells (two filled regions joined by a line)
 
