@@ -7,8 +7,8 @@ const TerserPlugin = require('terser-webpack-plugin');
 module.exports = {
   entry: './src/index.js',
   output: {
-    filename: 'higlass-arcs.min.js',
-    library: 'higlass-arcs',
+    filename: 'higlass-barbell.min.js',
+    library: 'higlass-barbell',
     libraryTarget: 'umd',
     path: path.resolve(__dirname, 'dist'),
   },
