@@ -291,7 +291,6 @@ export default function BarbellTrack(HGC, ...args) {
         this.colorScale = HEATED_OBJECT_MAP;
       }
 
-      console.log('rerender');
       this.updateExistingGraphics();
     }
 
@@ -596,7 +595,7 @@ export default function BarbellTrack(HGC, ...args) {
             geneInfo[5]
           );
 
-          this.drawnRects[td.uid] = [
+          this.drawnRects[td.uid + '_x'] = [
             xDrawnPoly,
             {
               start: xTxStart,
@@ -606,7 +605,7 @@ export default function BarbellTrack(HGC, ...args) {
             },
           ];
 
-          this.drawnRects[td.uid] = [
+          this.drawnRects[td.uid + '_m'] = [
             mDrawnPoly,
             {
               start: xTxEnd,
@@ -616,7 +615,7 @@ export default function BarbellTrack(HGC, ...args) {
             },
           ];
 
-          this.drawnRects[td.uid] = [
+          this.drawnRects[td.uid + '_y'] = [
             yDrawnPoly,
             {
               start: yTxStart,
@@ -923,61 +922,64 @@ export default function BarbellTrack(HGC, ...args) {
         );
         rectOutput.appendChild(gTile);
 
-        if (this.drawnRects && td.uid in this.drawnRects) {
-          const rect = this.drawnRects[td.uid][0];
-          const r = document.createElement('path');
-          let d = `M ${rect[0]} ${rect[1]}`;
+        for (let rectType of ['x', 'y', 'm']) {
+          const rectUid = `${td.uid}_${rectType}`;
+          if (this.drawnRects && rectUid in this.drawnRects) {
+            const rect = this.drawnRects[rectUid][0];
+            const r = document.createElement('path');
+            let d = `M ${rect[0]} ${rect[1]}`;
 
-          for (let i = 2; i < rect.length; i += 2) {
-            d += ` L ${rect[i]} ${rect[i + 1]}`;
-          }
-
-          const fill = this.drawnRects[td.uid][1].fill;
-          const fontColor =
-            this.options.fontColor !== undefined
-              ? colorToHex(this.options.fontColor)
-              : fill;
-
-          r.setAttribute('d', d);
-          r.setAttribute('fill', fill);
-          r.setAttribute('opacity', 0.3);
-
-          r.style.stroke = fill;
-          r.style.strokeWidth = '1px';
-
-          gTile.appendChild(r);
-
-          if (this.textManager.texts[td.uid]) {
-            const text = this.textManager.texts[td.uid];
-
-            if (!text.visible) {
-              return;
+            for (let i = 2; i < rect.length; i += 2) {
+              d += ` L ${rect[i]} ${rect[i + 1]}`;
             }
 
-            const g = document.createElement('g');
-            const t = document.createElement('text');
+            const fill = this.drawnRects[rectUid][1].fill;
+            const fontColor =
+              this.options.fontColor !== undefined
+                ? colorToHex(this.options.fontColor)
+                : fill;
 
-            textOutput.appendChild(g);
-            g.appendChild(t);
-            g.setAttribute(
-              'transform',
-              `translate(${text.x},${text.y})scale(${text.scale.x},1)`
-            );
+            r.setAttribute('d', d);
+            r.setAttribute('fill', fill);
+            r.setAttribute('opacity', 0.3);
 
-            t.setAttribute('text-anchor', 'middle');
-            t.setAttribute('font-family', TEXT_STYLE.fontFamily);
-            t.setAttribute(
-              'font-size',
-              +this.options.fontSize || TEXT_STYLE.fontSize
-            );
-            t.setAttribute('font-weight', 'bold');
-            t.setAttribute('dy', '5px');
-            t.setAttribute('fill', fontColor);
-            t.setAttribute('stroke', TEXT_STYLE.stroke);
-            t.setAttribute('stroke-width', '0.4');
-            t.setAttribute('text-shadow', '0px 0px 2px grey');
+            r.style.stroke = fill;
+            r.style.strokeWidth = '1px';
 
-            t.innerHTML = text.text;
+            gTile.appendChild(r);
+
+            if (this.textManager.texts[td.uid]) {
+              const text = this.textManager.texts[td.uid];
+
+              if (!text.visible) {
+                return;
+              }
+
+              const g = document.createElement('g');
+              const t = document.createElement('text');
+
+              textOutput.appendChild(g);
+              g.appendChild(t);
+              g.setAttribute(
+                'transform',
+                `translate(${text.x},${text.y})scale(${text.scale.x},1)`
+              );
+
+              t.setAttribute('text-anchor', 'middle');
+              t.setAttribute('font-family', TEXT_STYLE.fontFamily);
+              t.setAttribute(
+                'font-size',
+                +this.options.fontSize || TEXT_STYLE.fontSize
+              );
+              t.setAttribute('font-weight', 'bold');
+              t.setAttribute('dy', '5px');
+              t.setAttribute('fill', fontColor);
+              t.setAttribute('stroke', TEXT_STYLE.stroke);
+              t.setAttribute('stroke-width', '0.4');
+              t.setAttribute('text-shadow', '0px 0px 2px grey');
+
+              t.innerHTML = text.text;
+            }
           }
         }
       });
