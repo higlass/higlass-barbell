@@ -1107,6 +1107,9 @@ export default function BarbellTrack(HGC, ...args) {
       const objUnderMouse = this.getObjectUnderMouse(trackX, trackY);
 
       if (objUnderMouse) {
+        if (objUnderMouse.mouseOver) {
+          return objUnderMouse.mouseOver;
+        }
         return objUnderMouse.fields.join(' ');
       }
 
