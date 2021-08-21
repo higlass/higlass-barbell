@@ -108,6 +108,20 @@ export default function BarbellTrack(HGC, ...args) {
     return zoomIdentity.translate(0, t1).scale(k1);
   };
 
+  const clickFunc = (evt, track) => {
+    const pos = [
+    evt.data.global.x - track.position[0],
+    evt.data.global.y - track.position[1]
+    ]
+
+    const obj = track.getObjectUnderMouse(pos[0], pos[1]);
+
+    track.pubSub.publish('app.click', {
+    type: 'barbell',
+    event,
+    payload: obj,
+  })};
+
   class BarbellTrackClass extends HGC.tracks.HorizontalTiled1DPixiTrack {
     constructor(context, options) {
       super(context, options);
@@ -128,6 +142,12 @@ export default function BarbellTrack(HGC, ...args) {
 
       this.rectGraphics = new PIXI.Graphics();
       this.pMain.addChild(this.rectGraphics);
+      // this.rectGraphics.interactive = true;
+
+      // this.pMain.interactive = true;
+      // this.pMain.mouseover = mousedata => {
+      //   console.log('mouseover', mousedata);
+      // }
 
       this.selectedRect = null;
 
@@ -220,6 +240,9 @@ export default function BarbellTrack(HGC, ...args) {
         this.textManager.updateTexts();
       }
       this.render();
+
+      this.rectGraphics.interactive = true;
+      this.rectGraphics.mouseup = e => clickFunc(e, this);
     }
 
     selectRect(uid) {
@@ -364,9 +387,7 @@ export default function BarbellTrack(HGC, ...args) {
           rectY + rectHeight, // bottom
         ];
 
-        if (strand === '+') {
-          this.rectGraphics.drawPolygon(drawnPoly);
-        } else {
+        if (strand !== '+') {
           drawnPoly = [
             xEndPos,
             rectY, // top
@@ -375,7 +396,6 @@ export default function BarbellTrack(HGC, ...args) {
             xEndPos,
             rectY + rectHeight, // bottom
           ];
-          this.rectGraphics.drawPolygon(drawnPoly);
         }
       } else {
         if (strand === '+') {
@@ -417,8 +437,8 @@ export default function BarbellTrack(HGC, ...args) {
           ];
         }
 
-        // console.log('drawnPoly', drawnPoly);
         this.rectGraphics.drawPolygon(drawnPoly);
+        // this.rectGraphics.hitArea = PIXI.Graphics.Polygon
       }
 
       return drawnPoly;
@@ -1048,18 +1068,8 @@ export default function BarbellTrack(HGC, ...args) {
       this.animate();
     }
 
-    getMouseOverHtml(trackX, trackY) {
-      if (!this.tilesetInfo) {
-        return '';
-      }
-
-      if (!this.drawnRects) {
-        return '';
-      }
-
-      const closestText = '';
+    getObjectUnderMouse(trackX, trackY) {
       const point = [trackX, trackY];
-
       const visibleRects = Object.values(this.drawnRects);
 
       for (let i = 0; i < visibleRects.length; i++) {
@@ -1076,10 +1086,31 @@ export default function BarbellTrack(HGC, ...args) {
         const pc = classifyPoint(newArr, point);
 
         if (pc === -1) {
-          const parts = visibleRects[i][1].value.fields;
-
-          return parts.join(' ');
+          return visibleRects[i][1].value;
         }
+      }
+
+      return null;
+    }
+
+    getMouseOverHtml(trackX, trackY) {
+      if (!this.tilesetInfo) {
+        return '';
+      }
+
+      if (!this.drawnRects) {
+        return '';
+      }
+
+      const closestText = '';
+
+      const objUnderMouse = this.getObjectUnderMouse(trackX, trackY);
+
+      if (objUnderMouse) {
+        if (objUnderMouse.mouseOver) {
+          return objUnderMouse.mouseOver;
+        }
+        return objUnderMouse.fields.join(' ');
       }
 
       return closestText;

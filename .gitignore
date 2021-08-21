@@ -6,3 +6,4 @@ demo
 *.zip
 *.log
 *.DS_cache
+.DS_Store
