@@ -112,10 +112,12 @@ const testViewConfig =
 }
 
 
-window.hglib.viewer(
+const hgApi = window.hglib.viewer(
   document.getElementById('demo'),
   testViewConfig,
   { bounded: true },
 );
+
+hgApi.on('click', d => console.log('click', d))
 </script>
 </html>
