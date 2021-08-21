@@ -149,8 +149,6 @@ export default function BarbellTrack(HGC, ...args) {
       //   console.log('mouseover', mousedata);
       // }
 
-      this.selectedRect = null;
-
       this.uniqueSegments = [];
     }
 
@@ -243,13 +241,6 @@ export default function BarbellTrack(HGC, ...args) {
 
       this.rectGraphics.interactive = true;
       this.rectGraphics.mouseup = e => clickFunc(e, this);
-    }
-
-    selectRect(uid) {
-      this.selectedRect = uid;
-
-      this.render();
-      this.animate();
     }
 
     /** There was a click outside the track so unselect the
@@ -534,7 +525,10 @@ export default function BarbellTrack(HGC, ...args) {
             }
           }
 
-          if (
+          if (td.fill) {
+
+            fill = td.fill;
+          } else if (
             this.options &&
             this.options.colorEncoding === 'itemRgb' &&
             td.fields[8]
@@ -546,7 +540,9 @@ export default function BarbellTrack(HGC, ...args) {
 
               fill = color;
             }
-          } else if (this.colorValueScale) {
+          
+
+        } else if (this.colorValueScale) {
             const rgb = valueToColor(
               this.colorValueScale,
               this.colorScale,
@@ -566,11 +562,11 @@ export default function BarbellTrack(HGC, ...args) {
 
           const opacity = this.options.fillOpacity || 0.3;
 
-          if (this.selectedRect === td.uid) {
-            this.rectGraphics.lineStyle(3, 0, 0.75);
-          } else {
-            this.rectGraphics.lineStyle(1, colorToHex(fill), opacity);
-          }
+          const strokeWidth = td.strokeWidth || 1;
+          const strokeColor = td.strokeColor || fill;
+          const strokeOpacity = td.strokeOpacity || opacity;
+
+            this.rectGraphics.lineStyle(strokeWidth, colorToHex(strokeColor), strokeOpacity);
 
           this.rectGraphics.beginFill(colorToHex(fill), opacity);
 
