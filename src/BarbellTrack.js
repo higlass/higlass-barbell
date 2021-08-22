@@ -487,7 +487,9 @@ export default function BarbellTrack(HGC, ...args) {
 
       this.initialize();
 
-      const rowScale = scaleBand().domain(range(maxRows)).range([startY, endY]);
+      const rowScale = scaleBand().domain(range(maxRows)).range([startY, endY])
+        .paddingInner((this.options && this.options.paddingInner) || 0)
+        .paddingOuter((this.options && this.options.paddingOuter) || 0)
       // .paddingOuter(0.2);
       // .paddingInner(0.3)
 
@@ -1125,7 +1127,28 @@ BarbellTrack.config = {
   orientation: '1d-horizontal',
   name: 'Barbell',
   thumbnail: new DOMParser().parseFromString(icon, 'text/xml').documentElement,
-  availableOptions: [],
-  defaultOptions: {},
+  availableOptions: [
+      'annotationHeight',
+      'fillColor',
+      'fillOpacity',
+      'maxAnnotationHeight',
+      'labelBottomMargin',
+      'labelColor',
+      'labelLeftMargin',
+      'labelPosition',
+      'labelRightMargin',
+      'labelTopMargin',
+      'labelTextOpacity',
+      'labelBackgroundOpacity',
+      'paddingInner',
+      'paddingOuter',
+      'showTexts',
+      'trackBorderWidth',
+      'trackBorderColor',
+  ],
+  defaultOptions: {
+    paddingInner: 0,
+    paddingOuter: 0,
+  },
   optionsInfo: {},
 };

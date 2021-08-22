@@ -1,3 +1,7 @@
+## v0.2.1
+
+- Added paddingInner and paddingOuter options
+
 ## v0.2.0
 
 - Click handler
