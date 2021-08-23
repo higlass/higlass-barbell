@@ -75,6 +75,7 @@ Take a look at [`src/index.html`](src/index.html) for an example.
 
 This track expects bedpe style data served from either a higlass server or [local tile values](https://docs.higlass.io/view_config.html#raw-tile-values). If local tiles are provided, you can set the following extra properties in each data object:
 
+- mouseOver - Text that should appear when the mouse hovers or a barbell
 - strokeWidth - The width of the outline of each barbell
 - strokeColor - The color of the outline of each barbell
 - strokeOpacity - The opacity of the outline of each barbell
