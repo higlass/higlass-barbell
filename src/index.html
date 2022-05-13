@@ -23,32 +23,112 @@
 </body>
 <script src="hglib.js"></script>
 <script>
-  const testViewConfig =
-  {
-    "editable": true,
-    "zoomFixed": false,
-    "trackSourceServers": [],
-    "exportViewUrl": "/api/v1/viewconfs",
-    "views": [
-      {
-        "uid": "aa",
-        "autocompleteSource": "/api/v1/suggest/?d=OHJakQICQD6gTD7skx4EWA&",
-        "tracks": {
-          "top": [
-            {
-              "chromInfoPath": "http://compeng-pete-dev.techsci.sana.com:8178/chromsizes/3",
-              "type": "horizontal-chromosome-labels",
-              "height": 30,
-              "options": {
-                "color": "#808080",
-                "stroke": "#ffffff",
-                "fontSize": 12,
-                "fontIsLeftAligned": false,
-                "showMousePosition": false,
-                "mousePositionColor": "#000000",
-                "reverseOrientation": false
-              },
-              "uid": "PzI0YqVXSrO6yp1d0VqsZg"
+const testViewConfig =
+{
+  "editable": true,
+  "trackSourceServers": [
+    "/api/v1",
+    "http://higlass.io/api/v1"
+  ],
+  "exportViewUrl": "/api/v1/viewconfs",
+  "views": [
+    {
+      "initialXDomain": [
+        412163054.6428307,
+        412482302.04500496
+      ],
+      "initialYDomain": [
+        571270398.990102,
+        571444565.0433782
+      ],
+      "tracks": {
+        "top": [
+          {
+            "type": "barbell",
+            "uid": "QloHG0BvQa-EX1Aq9NL14g",
+            "tilesetUid": "OTSMBnLtTIibTwVLIku0GQ",
+            "server": "https://resgen.io/api/v1",
+            "data": {
+              "type": "local-tiles",
+              "tilesetInfo": {
+  "OTSMBnLtTIibTwVLIku0GQ": {
+    "max_width": 2730871774,
+    "max_zoom": 0,
+    "min_pos": [
+      0,
+      0
+    ],
+    "max_pos": [
+      2730871774,
+      2730871774
+    ],
+    "header": "",
+    "datatype": "bedpe",
+    "name": "Sox2_SCR (2).bedpe",
+    "coordSystem": "mm10"
+  }
+},
+              "tiles": {
+  "OTSMBnLtTIibTwVLIku0GQ.0.0": [
+    {
+      "uid": 0,
+      "xStart": 412232865,
+      "xEnd": 412239391,
+      "yStart": 412337941,
+      "yEnd": 412351977,
+      "xChrOffset": 377585195,
+      "yChrOffset": 377585195,
+      "importance": 0.8289870449281151,
+      "mouseOver": "<b>hi</b>",
+      "fields": [
+        "chr3",
+        34647670,
+        34654196,
+        "chr3",
+        34752746,
+        34766782
+      ]
+    },
+        {
+      "uid": 1,
+      "fill": "red",
+      "strokeWidth": 3,
+      "strokeColor": "black",
+      "strokeOpacity": 1,
+      "xStart": 412232865,
+      "xEnd": 412239391,
+      "yStart": 412337941,
+      "yEnd": 412351977,
+      "xChrOffset": 377585195,
+      "yChrOffset": 377585195,
+      "importance": 0.8289870449281151,
+      "mouseOver": "<b>there</b>",
+      "fields": [
+        "chr3",
+        34637670,
+        34644196,
+        "chr3",
+        34742746,
+        34756782
+      ]
+    }
+  ],
+}
+            },
+            "options": {
+              "arcStyle": "ellipse",
+              "completelyContained": false,
+              "paddingInner": 0.1,
+              "paddingOuter": 0.1,
+              "flip1D": "no",
+              "labelColor": "black",
+              "labelPosition": "hidden",
+              "strokeColor": "black",
+              "strokeOpacity": 1,
+              "strokeWidth": 1,
+              "trackBorderWidth": 0,
+              "trackBorderColor": "black",
+              "name": "Sox2_SCR (2).bedpe"
             },
             {
               "type": "bedlike",
