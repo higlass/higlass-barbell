@@ -48,9 +48,78 @@ const testViewConfig =
             "uid": "QloHG0BvQa-EX1Aq9NL14g",
             "tilesetUid": "OTSMBnLtTIibTwVLIku0GQ",
             "server": "https://resgen.io/api/v1",
+            "data": {
+              "type": "local-tiles",
+              "tilesetInfo": {
+  "OTSMBnLtTIibTwVLIku0GQ": {
+    "max_width": 2730871774,
+    "max_zoom": 0,
+    "min_pos": [
+      0,
+      0
+    ],
+    "max_pos": [
+      2730871774,
+      2730871774
+    ],
+    "header": "",
+    "datatype": "bedpe",
+    "name": "Sox2_SCR (2).bedpe",
+    "coordSystem": "mm10"
+  }
+},
+              "tiles": {
+  "OTSMBnLtTIibTwVLIku0GQ.0.0": [
+    {
+      "uid": 0,
+      "xStart": 412232865,
+      "xEnd": 412239391,
+      "yStart": 412337941,
+      "yEnd": 412351977,
+      "xChrOffset": 377585195,
+      "yChrOffset": 377585195,
+      "importance": 0.8289870449281151,
+      "mouseOver": "<b>hi</b>",
+      "fields": [
+        "chr3",
+        34647670,
+        34654196,
+        "chr3",
+        34752746,
+        34766782
+      ]
+    },
+        {
+      "uid": 1,
+      "fill": "red",
+      "strokeWidth": 3,
+      "strokeColor": "black",
+      "strokeOpacity": 1,
+      "xStart": 412232865,
+      "xEnd": 412239391,
+      "yStart": 412337941,
+      "yEnd": 412351977,
+      "xChrOffset": 377585195,
+      "yChrOffset": 377585195,
+      "importance": 0.8289870449281151,
+      "mouseOver": "<b>there</b>",
+      "fields": [
+        "chr3",
+        34637670,
+        34644196,
+        "chr3",
+        34742746,
+        34756782
+      ]
+    }
+  ],
+}
+            },
             "options": {
               "arcStyle": "ellipse",
               "completelyContained": false,
+              "paddingInner": 0.1,
+              "paddingOuter": 0.1,
               "flip1D": "no",
               "labelColor": "black",
               "labelPosition": "hidden",
@@ -112,10 +181,12 @@ const testViewConfig =
 }
 
 
-window.hglib.viewer(
+const hgApi = window.hglib.viewer(
   document.getElementById('demo'),
   testViewConfig,
   { bounded: true },
 );
+
+hgApi.on('click', d => console.log('click', d))
 </script>
 </html>

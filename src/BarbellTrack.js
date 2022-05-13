@@ -167,14 +167,13 @@ export default function BarbellTrack(HGC, ...args) {
     }
 
     const opacity = track.options.fillOpacity || 0.3;
-
-    if (selected || track.selectedRect === td.uid) {
-      graphics.lineStyle(3, 0, 0.75);
-    } else {
-      graphics.lineStyle(1, colorToHex(fill), opacity);
-    }
+    const strokeWidth = td.strokeWidth || 1;
+    const strokeColor = td.strokeColor || fill;
+    const strokeOpacity = td.strokeOpacity || opacity;
 
     graphics.beginFill(colorToHex(fill), opacity);
+    track.getRectGraphics().lineStyle(strokeWidth, colorToHex(strokeColor), strokeOpacity);
+    track.getRectGraphics().beginFill(colorToHex(fill), opacity);
 
     let rectY = yMiddle - rectHeight / 2;
     const xStartPos = track._xScale(xTxStart);
@@ -264,6 +263,19 @@ export default function BarbellTrack(HGC, ...args) {
       td.fields[3]
     );
   };
+  const clickFunc = (evt, track) => {
+    const pos = [
+    evt.data.global.x - track.position[0],
+    evt.data.global.y - track.position[1]
+    ]
+
+    const obj = track.getObjectUnderMouse(pos[0], pos[1]);
+
+    track.pubSub.publish('app.click', {
+    type: 'barbell',
+    event,
+    payload: obj,
+  })};
 
   class BarbellTrackClass extends HGC.tracks.HorizontalTiled1DPixiTrack {
     constructor(context, options) {
@@ -283,9 +295,15 @@ export default function BarbellTrack(HGC, ...args) {
       this.minRawValue = null;
       this.maxRawValue = null;
 
-      this.hovered = null;
+      this.rectGraphics = new PIXI.Graphics();
+      this.pMain.addChild(this.rectGraphics);
+      // this.rectGraphics.interactive = true;
 
-      this.selectedRect = null;
+      // this.pMain.interactive = true;
+      // this.pMain.mouseover = mousedata => {
+      //   console.log('mouseover', mousedata);
+      // }
+
       this.uniqueSegments = [];
     }
 
@@ -324,6 +342,15 @@ export default function BarbellTrack(HGC, ...args) {
 
       return this.mouseOverGraphics
     }
+
+    getRectGraphics() {
+      if (!this.rectGraphics) {
+        this.initGraphics();
+      }
+
+      return this.rectGraphics;
+    }
+
     /** Factor out some initialization code for the track. This is
    necessary because we can now load tiles synchronously and so
    we have to check if the track is initialized in renderTiles
@@ -406,13 +433,9 @@ export default function BarbellTrack(HGC, ...args) {
       this.getTextManager().updateTexts();
 
       this.render();
-    }
 
-    selectRect(uid) {
-      this.selectedRect = uid;
-
-      this.render();
-      this.animate();
+      this.getRectGraphics().interactive = true;
+      this.getRectGraphics().mouseup = e => clickFunc(e, this);
     }
 
     /** There was a click outside the track so unselect the
@@ -529,9 +552,7 @@ export default function BarbellTrack(HGC, ...args) {
           rectY + rectHeight, // bottom
         ];
 
-        if (strand === '+') {
-          graphics.drawPolygon(drawnPoly);
-        } else {
+        if (strand !== '+') {
           drawnPoly = [
             xEndPos,
             rectY, // top
@@ -540,7 +561,6 @@ export default function BarbellTrack(HGC, ...args) {
             xEndPos,
             rectY + rectHeight, // bottom
           ];
-          graphics.drawPolygon(drawnPoly);
         }
       } else {
         if (strand === '+') {
@@ -582,7 +602,8 @@ export default function BarbellTrack(HGC, ...args) {
           ];
         }
 
-        graphics.drawPolygon(drawnPoly);
+        this.getRectGraphics().drawPolygon(drawnPoly);
+        // this.rectGraphics.hitArea = PIXI.Graphics.Polygon
       }
 
       return drawnPoly;
@@ -640,7 +661,9 @@ export default function BarbellTrack(HGC, ...args) {
 
       this.initialize();
 
-      this.getRowScale()[strand] = scaleBand().domain(range(maxRows)).range([startY, endY]);
+      this.getRowScale()[strand] = scaleBand().domain(range(maxRows)).range([startY, endY])
+        .paddingInner((this.options && this.options.paddingInner) || 0)
+        .paddingOuter((this.options && this.options.paddingOuter) || 0)
       // .paddingOuter(0.2);
       // .paddingInner(0.3)
 
@@ -652,7 +675,8 @@ export default function BarbellTrack(HGC, ...args) {
           // rendered += 1;
           const td = rows[j][i].value;
           td.row = j;
-          td.fill = fill;
+          td.fill = td.fill || fill;
+
 
           renderBarbell(td, this.rectGraphics, this, false, strand);
         }
@@ -672,7 +696,7 @@ export default function BarbellTrack(HGC, ...args) {
 
       this.prevVertY = this.vertY;
 
-      const oldRectGraphics = this.rectGraphics;
+      const oldRectGraphics = this.getRectGraphics();
       this.rectGraphics = new PIXI.Graphics();
 
       // store the scale at while the tile was drawn at so that
@@ -1074,21 +1098,8 @@ export default function BarbellTrack(HGC, ...args) {
       this.animate();
     }
 
-    getMouseOverHtml(trackX, trackY) {
-      if (!this.tilesetInfo) {
-        return '';
-      }
-
-      if (!this.drawnRects) {
-        return '';
-      }
-
-      this.getMouseOverGraphics().clear();
-      this.animate();
-
-      const closestText = '';
+    getObjectUnderMouse(trackX, trackY) {
       const point = [trackX, trackY];
-
       const visibleRects = Object.values(this.drawnRects);
 
 
@@ -1106,24 +1117,31 @@ export default function BarbellTrack(HGC, ...args) {
         const pc = classifyPoint(newArr, point);
         
         if (pc === -1) {
-          if (!this.hovered) {
-            this.hovered = visibleRects[i][1].value;
-          }
-
-          renderBarbell(
-            visibleRects[i][1].value,
-            this.getMouseOverGraphics(),
-            this,
-            true,
-            visibleRects[i][1].strand
-          );
-
-          this.animate();
-
-          const parts = visibleRects[i][1].value.fields;
-
-          return parts.join(' ');
+          return visibleRects[i][1].value;
         }
+      }
+
+      return null;
+    }
+
+    getMouseOverHtml(trackX, trackY) {
+      if (!this.tilesetInfo) {
+        return '';
+      }
+
+      if (!this.drawnRects) {
+        return '';
+      }
+
+      const closestText = '';
+
+      const objUnderMouse = this.getObjectUnderMouse(trackX, trackY);
+
+      if (objUnderMouse) {
+        if (objUnderMouse.mouseOver) {
+          return objUnderMouse.mouseOver;
+        }
+        return objUnderMouse.fields.join(' ');
       }
 
       if (this.hovered) {
@@ -1147,8 +1165,27 @@ BarbellTrack.config = {
   name: 'Barbell',
   thumbnail: new DOMParser().parseFromString(icon, 'text/xml').documentElement,
   availableOptions: [
-    'showTexts'
+      'annotationHeight',
+      'fillColor',
+      'fillOpacity',
+      'maxAnnotationHeight',
+      'labelBottomMargin',
+      'labelColor',
+      'labelLeftMargin',
+      'labelPosition',
+      'labelRightMargin',
+      'labelTopMargin',
+      'labelTextOpacity',
+      'labelBackgroundOpacity',
+      'paddingInner',
+      'paddingOuter',
+      'showTexts',
+      'trackBorderWidth',
+      'trackBorderColor',
   ],
-  defaultOptions: {},
+  defaultOptions: {
+    paddingInner: 0,
+    paddingOuter: 0,
+  },
   optionsInfo: {},
 };

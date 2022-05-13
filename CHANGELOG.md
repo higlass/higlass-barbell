@@ -1,3 +1,13 @@
+## v0.2.1
+
+- Added paddingInner and paddingOuter options
+
+## v0.2.0
+
+- Click handler
+- Specify mouseOver html in data item object
+- Speicfy fill and stroke properties in data item object 
+
 ## v0.1.5
 
 - Fix SVG export
