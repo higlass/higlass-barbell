@@ -1,121 +1,408 @@
 <!DOCTYPE html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="author" content="Fritz Lekschas">
-<meta name="description" content="Display barbells for BEDPE data">
-<meta name="keywords" content="HiGlass, Plugin Tracks, Barbell">
-<title>Barbell Track for HiGlass</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<link rel="stylesheet" href="hglib.css">
 
-<script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
-<script crossorigin src="https://unpkg.com/pixi.js-legacy@5/dist/pixi-legacy.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.32.1/react-bootstrap.min.js"></script>
-<body >
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="author" content="Fritz Lekschas">
+  <meta name="description" content="Display barbells for BEDPE data">
+  <meta name="keywords" content="HiGlass, Plugin Tracks, Barbell">
+  <title>Barbell Track for HiGlass</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="hglib.css">
+
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/pixi.js-legacy@5/dist/pixi-legacy.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.32.1/react-bootstrap.min.js"></script>
+
+<body>
   <div style="height: 50px" />
-    <div
-      id="demo"
-      style="position: absolute; left: 1rem; top: 1rem; bottom: 1rem; right: 1rem">
-    </div>
+  <div id="demo" style="position: absolute; left: 1rem; top: 1rem; bottom: 1rem; right: 1rem">
+  </div>
   </div>
 </body>
 <script src="hglib.js"></script>
 <script>
-const testViewConfig =
-{
-  "editable": true,
-  "trackSourceServers": [
-    "/api/v1",
-    "http://higlass.io/api/v1"
-  ],
-  "exportViewUrl": "/api/v1/viewconfs",
-  "views": [
-    {
-      "initialXDomain": [
-        412163054.6428307,
-        412482302.04500496
-      ],
-      "initialYDomain": [
-        571270398.990102,
-        571444565.0433782
-      ],
-      "tracks": {
-        "top": [
-          {
-            "type": "barbell",
-            "uid": "QloHG0BvQa-EX1Aq9NL14g",
-            "tilesetUid": "OTSMBnLtTIibTwVLIku0GQ",
-            "server": "https://resgen.io/api/v1",
-            "options": {
-              "arcStyle": "ellipse",
-              "completelyContained": false,
-              "flip1D": "no",
-              "labelColor": "black",
-              "labelPosition": "hidden",
-              "strokeColor": "black",
-              "strokeOpacity": 1,
-              "strokeWidth": 1,
-              "trackBorderWidth": 0,
-              "trackBorderColor": "black",
-              "name": "Sox2_SCR (2).bedpe"
+  const testViewConfig =
+  {
+    "editable": true,
+    "zoomFixed": false,
+    "trackSourceServers": [],
+    "exportViewUrl": "/api/v1/viewconfs",
+    "views": [
+      {
+        "uid": "aa",
+        "autocompleteSource": "/api/v1/suggest/?d=OHJakQICQD6gTD7skx4EWA&",
+        "tracks": {
+          "top": [
+            {
+              "chromInfoPath": "http://compeng-pete-dev.techsci.sana.com:8178/chromsizes/3",
+              "type": "horizontal-chromosome-labels",
+              "height": 30,
+              "options": {
+                "color": "#808080",
+                "stroke": "#ffffff",
+                "fontSize": 12,
+                "fontIsLeftAligned": false,
+                "showMousePosition": false,
+                "mousePositionColor": "#000000",
+                "reverseOrientation": false
+              },
+              "uid": "PzI0YqVXSrO6yp1d0VqsZg"
             },
-            "width": 933,
-            "height": 117
-          },
-          {
-            "type": "chromosome-labels",
-            "uid": "anzG0-RxTVStVfQ1m-dJNw",
-            "tilesetUid": "O8tQOpn0RjiFrUBmrhph4A",
-            "server": "https://resgen.io/api/v1",
-            "options": {
-              "color": "#808080",
-              "stroke": "#ffffff",
-              "fontSize": 12,
-              "fontIsLeftAligned": false,
-              "showMousePosition": false,
-              "mousePositionColor": "#000000"
+            {
+              "type": "bedlike",
+              "height": 30,
+              "data": {
+                "type": "local-tiles",
+                "tilesetInfo": {
+                  "t": {
+                    "min_pos": [
+                      0
+                    ],
+                    "max_pos": [
+                      3099750718
+                    ],
+                    "max_width": 3099750718,
+                    "max_zoom": 0
+                  }
+                },
+                "tiles": {
+                  "t.0.0": [
+                    {
+                      "uid": "0_0",
+                      "chrOffset": 872523821,
+                      "xStart": 917239248,
+                      "xEnd": 917239271,
+                      "fields": [
+                        "15",
+                        44715427,
+                        44715450,
+                        "0"
+                      ],
+                      "importance": 0.1794387975958911
+                    }
+                  ]
+                }
+              },
+              "options": {
+                "fontSize": 14,
+                "fontColor": "black",
+                "fillColor": "grey",
+                "showTexts": "yes",
+                "alternating": false,
+                "annotationStyle": "box",
+                "fillOpacity": 0.3,
+                "axisPositionHorizontal": "right",
+                "labelColor": "black",
+                "labelPosition": "hidden",
+                "labelLeftMargin": 0,
+                "labelRightMargin": 0,
+                "labelTopMargin": 0,
+                "labelBottomMargin": 0,
+                "minHeight": 20,
+                "maxAnnotationHeight": null,
+                "trackBorderWidth": 0,
+                "trackBorderColor": "black",
+                "valueColumn": null,
+                "colorEncoding": "itemRgb",
+                "colorRange": [
+                  "#000000",
+                  "#652537",
+                  "#bf5458",
+                  "#fba273",
+                  "#ffffe0"
+                ],
+                "colorEncodingRange": false,
+                "separatePlusMinusStrands": true,
+                "annotationHeight": 16
+              },
+              "uid": "GaAG9TsjQ8Kvl6RmqacLCw"
             },
-            "width": 933,
-            "height": 30
-          }
+            {
+              "type": "barbell",
+              "height": 300,
+              "data": {
+                "type": "local-tiles",
+                "tilesetInfo": {
+                  "t": {
+                    "min_pos": [
+                      0
+                    ],
+                    "max_pos": [
+                      3099750718
+                    ],
+                    "max_width": 3099750718,
+                    "max_zoom": 0
+                  }
+                },
+                "tiles": {
+                  "t.0.0": [
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239099,
+                      "xEnd": 917239119,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239335,
+                      "yEnd": 917239356,
+                      "uid": "0_0",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span></span></div></div>",
+                      "fields": [
+                        "15",
+                        44715278,
+                        44715298,
+                        "Name: 15",
+                        44715514,
+                        44715535
+                      ],
+                      "strokeWidth": 2,
+                      "strokeOpacity": 1,
+                      "fill": "green",
+                      "importance": 49121
+                    },
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239099,
+                      "xEnd": 917239119,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239338,
+                      "yEnd": 917239359,
+                      "uid": "0_1",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span></span></div></div>",
+                      "fields": [
+                        "15",
+                        44715278,
+                        44715298,
+                        "Name: 15",
+                        44715517,
+                        44715538
+                      ],
+                      "fill": "green",
+                      "importance": 49122
+                    },
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239098,
+                      "xEnd": 917239118,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239335,
+                      "yEnd": 917239356,
+                      "uid": "0_2",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span></span></div></div>",
+                      "fields": [
+                        "15",
+                        44715277,
+                        44715297,
+                        "Name: 15",
+                        44715514,
+                        44715535
+                      ],
+                      "fill": "green",
+                      "importance": 49123
+                    },
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239098,
+                      "xEnd": 917239118,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239338,
+                      "yEnd": 917239359,
+                      "uid": "0_3",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span></span></div></div>",
+                      "fields": [
+                        "15",
+                        44715277,
+                        44715297,
+                        "Name: 15",
+                        44715517,
+                        44715538
+                      ],
+                      "strokeWidth": 2,
+                      "strokeOpacity": 1,
+                      "fill": "green",
+                      "importance": 49124
+                    },
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239094,
+                      "xEnd": 917239114,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239335,
+                      "yEnd": 917239356,
+                      "uid": "0_4",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span></span></div></div>",
+                      "fields": [
+                        "15",
+                        44715273,
+                        44715293,
+                        "Name: 15",
+                        44715514,
+                        44715535
+                      ],
+                      "fill": "green",
+                      "importance": 49125
+                    },
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239094,
+                      "xEnd": 917239114,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239338,
+                      "yEnd": 917239359,
+                      "uid": "0_5",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span></span></div></div>",
+                      "fields": [
+                        "15",
+                        44715273,
+                        44715293,
+                        "Name: 15",
+                        44715517,
+                        44715538
+                      ],
+                      "strokeWidth": 2,
+                      "strokeOpacity": 1,
+                      "fill": "green",
+                      "importance": 49126,
+                      "yMiddle": 0.054455445544554414
+                    },
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239099,
+                      "xEnd": 917239119,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239336,
+                      "yEnd": 917239357,
+                      "uid": "0_6",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span></span></div></div>",
+                      "fields": [
+                        "15",
+                        44715278,
+                        44715298,
+                        "Name: 15",
+                        44715515,
+                        44715536
+                      ],
+                      "fill": "green",
+                      "importance": 49127
+                    },
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239099,
+                      "xEnd": 917239119,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239337,
+                      "yEnd": 917239358,
+                      "uid": "0_7",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span>self_binding_right_left_tag</span></div></div>",
+                      "fields": [
+                        "15",
+                        44715278,
+                        44715298,
+                        "Name: 15",
+                        44715516,
+                        44715537
+                      ],
+                      "fill": "orange",
+                      "importance": 49128
+                    },
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239098,
+                      "xEnd": 917239118,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239336,
+                      "yEnd": 917239357,
+                      "uid": "0_8",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span></span></div></div>",
+                      "fields": [
+                        "15",
+                        44715277,
+                        44715297,
+                        "Name: 15",
+                        44715515,
+                        44715536
+                      ],
+                      "fill": "green",
+                      "importance": 49129
+                    },
+                    {
+                      "xChrOffset": 872523821,
+                      "xStart": 917239098,
+                      "xEnd": 917239118,
+                      "yChrOffset": 872523821,
+                      "yStart": 917239337,
+                      "yEnd": 917239358,
+                      "uid": "0_9",
+                      "mouseOver": "<div style=\"font-size:0.9rem\" data-reactroot=\"\"><div><b>Left Explain:</b><span> </span><span>considered 1276, GC content failed 1, low tm 607, high tm 136, ok 532</span></div><div><b>Right Explain:</b><span> </span><span>considered 1276, low tm 834, high tm 13, ok 429</span></div><div><b>Problems:</b><span> </span><span></span></div></div>",
+                      "fields": [
+                        "15",
+                        44715277,
+                        44715297,
+                        "Name: 15",
+                        44715516,
+                        44715537
+                      ],
+                      "fill": "green",
+                      "importance": 49130
+                    }
+                  ]
+                }
+              },
+              "options": {
+                "annotationHeight": "scaled",
+                "paddingInner": 0.1,
+                "paddingOuter": 0.1,
+                "maxAnnotationHeight": 12,
+                "showTexts": "yes"
+              },
+              "uid": "MnuSgbnCQvuhOzvB5QBqWw"
+            }
+          ],
+          "left": [],
+          "center": [],
+          "right": [],
+          "bottom": [],
+          "whole": [],
+          "gallery": []
+        },
+        "layout": {
+          "w": 12,
+          "h": 10,
+          "x": 0,
+          "y": 0,
+          "moved": false,
+          "static": false
+        },
+        "initialYDomain": [
+          1550000000,
+          1550000000
         ],
-        "left": [],
-        "center": [],
-        "bottom": [],
-        "right": [],
-        "whole": [],
-        "gallery": []
-      },
-      "layout": {
-        "w": 12,
-        "h": 6,
-        "x": 0,
-        "y": 0
-      },
-      "uid": "SVrVEJbqT5yrFSJXe55u1A"
+        "initialXDomain": [
+          917239044,
+          917239409
+        ]
+      }
+    ],
+    "zoomLocks": {
+      "locksByViewUid": {},
+      "locksDict": {}
+    },
+    "locationLocks": {
+      "locksByViewUid": {},
+      "locksDict": {}
+    },
+    "valueScaleLocks": {
+      "locksByViewUid": {},
+      "locksDict": {}
     }
-  ],
-  "zoomLocks": {
-    "locksByViewUid": {},
-    "locksDict": {}
-  },
-  "locationLocks": {
-    "locksByViewUid": {},
-    "locksDict": {}
-  },
-  "valueScaleLocks": {
-    "locksByViewUid": {},
-    "locksDict": {}
   }
-}
 
 
-window.hglib.viewer(
-  document.getElementById('demo'),
-  testViewConfig,
-  { bounded: true },
-);
+  window.hglib.viewer(
+    document.getElementById('demo'),
+    testViewConfig,
+    { bounded: false },
+  );
 </script>
+
 </html>

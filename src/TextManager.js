@@ -132,12 +132,6 @@ export class TextManager {
         x => !x.yMiddle || (x.yMiddle > yRange[0] && x.yMiddle < yRange[1]),
       );
 
-      // console.log('relevantSegments:', relevantSegments);
-
-      // if (!relevantSegments.length) {
-      //   return;
-      // }
-
       relevantSegments.forEach((td, i) => {
         // don't draw too many texts so they don't bog down the frame rate
         if (i >= (+this.track.options.maxTexts || MAX_TEXTS)) {
