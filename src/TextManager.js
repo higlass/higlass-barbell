@@ -116,8 +116,13 @@ export class TextManager {
   }
 
   updateTexts() {
-    if (this.track.options.showTexts) {
-      this.texts = {};
+    this.texts = {};
+
+    if (!this.track.options.showTexts) {
+      this.textGraphics.removeChildren();
+      this.textsList = [];
+      return;
+    }
 
       let yRange = [
         (0 - this.track.vertY) / (this.track.vertK * this.track.prevK),
@@ -173,6 +178,6 @@ export class TextManager {
         const text = this.textsList.pop();
         this.textGraphics.removeChild(text);
       }
-    }
+    
   }
 }
