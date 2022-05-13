@@ -70,6 +70,43 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 Take a look at [`src/index.html`](src/index.html) for an example.
 
+
+### Expected data
+
+This track expects bedpe style data served from either a higlass server or [local tile values](https://docs.higlass.io/view_config.html#raw-tile-values). If local tiles are provided, you can set the following extra properties in each data object:
+
+- mouseOver - Text that should appear when the mouse hovers or a barbell
+- strokeWidth - The width of the outline of each barbell
+- strokeColor - The color of the outline of each barbell
+- strokeOpacity - The opacity of the outline of each barbell
+- color - The fill color of each barbell
+
+```json
+    {
+      "uid": 1,
+      "fill": "red",
+      "strokeWidth": 3,
+      "strokeColor": "black",
+      "strokeOpacity": 1,
+      "xStart": 412232865,
+      "xEnd": 412239391,
+      "yStart": 412337941,
+      "yEnd": 412351977,
+      "xChrOffset": 377585195,
+      "yChrOffset": 377585195,
+      "importance": 0.8289870449281151,
+      "mouseOver": "<b>there</b>",
+      "fields": [
+        "chr3",
+        34637670,
+        34644196,
+        "chr3",
+        34742746,
+        34756782
+      ]
+    }
+```
+
 ## Development
 
 ### Installation

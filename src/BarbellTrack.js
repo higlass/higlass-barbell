@@ -406,13 +406,9 @@ export default function BarbellTrack(HGC, ...args) {
       this.getTextManager().updateTexts();
 
       this.render();
-    }
 
-    selectRect(uid) {
-      this.selectedRect = uid;
-
-      this.render();
-      this.animate();
+      this.rectGraphics.interactive = true;
+      this.rectGraphics.mouseup = e => clickFunc(e, this);
     }
 
     /** There was a click outside the track so unselect the
@@ -1074,6 +1070,7 @@ export default function BarbellTrack(HGC, ...args) {
       this.animate();
     }
 
+
     getMouseOverHtml(trackX, trackY) {
       if (!this.tilesetInfo) {
         return '';
@@ -1087,8 +1084,8 @@ export default function BarbellTrack(HGC, ...args) {
       this.animate();
 
       const closestText = '';
-      const point = [trackX, trackY];
 
+      const point = [trackX, trackY];
       const visibleRects = Object.values(this.drawnRects);
 
 
@@ -1122,8 +1119,11 @@ export default function BarbellTrack(HGC, ...args) {
 
           const parts = visibleRects[i][1].value.fields;
 
-          return parts.join(' ');
+      if (objUnderMouse) {
+        if (objUnderMouse.mouseOver) {
+          return objUnderMouse.mouseOver;
         }
+        return objUnderMouse.fields.join(' ');
       }
 
       if (this.hovered) {
@@ -1150,5 +1150,6 @@ BarbellTrack.config = {
     'showTexts'
   ],
   defaultOptions: {},
+
   optionsInfo: {},
 };
