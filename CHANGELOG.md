@@ -1,3 +1,8 @@
+## v0.3.0
+
+- Fixes to how text is rendered
+- Added strandedness
+
 ## v0.2.1
 
 - Added paddingInner and paddingOuter options
