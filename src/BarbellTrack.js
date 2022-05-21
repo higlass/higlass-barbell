@@ -110,7 +110,7 @@ export default function BarbellTrack(HGC, ...args) {
     return zoomIdentity.translate(0, t1).scale(k1);
   };
 
-  const renderBarbell = (td, graphics, track, selected, strand) => {
+  const renderBarbell = (td, graphics, track, strand) => {
     const geneInfo = td.fields;
     let { row, fill } = td;
 
@@ -185,7 +185,6 @@ export default function BarbellTrack(HGC, ...args) {
 
     // draw the left end of the barbell
     const xDrawnPoly = track.drawPoly(
-      graphics,
       xStartPos,
       xEndPos,
       rectY * track.prevK,
@@ -193,25 +192,24 @@ export default function BarbellTrack(HGC, ...args) {
       geneInfo[5]
     );
 
+
     // draw the middle line connecting the two
     const mDrawnPoly = track.drawPoly(
-      graphics,
       xEndPos,
       yStartPos,
       (rectY + rectHeight / 2) * track.prevK,
 
       1,
-      geneInfo[5]
+      null
     );
 
     // draw the right end of the barbell
     const yDrawnPoly = track.drawPoly(
-      graphics,
       yStartPos,
       yEndPos,
       rectY * track.prevK,
       rectHeight * track.prevK,
-      geneInfo[5]
+      strand
     );
 
     track.drawnRects[td.uid + '_x'] = [
@@ -295,20 +293,13 @@ export default function BarbellTrack(HGC, ...args) {
       this.minRawValue = null;
       this.maxRawValue = null;
 
-      this.rectGraphics = new PIXI.Graphics();
-      this.pMain.addChild(this.rectGraphics);
-      // this.rectGraphics.interactive = true;
-
-      // this.pMain.interactive = true;
-      // this.pMain.mouseover = mousedata => {
-      //   console.log('mouseover', mousedata);
-      // }
-
       this.uniqueSegments = [];
     }
 
     getTextManager() {
       if (!this.textManager) {
+        this.initGraphics();
+        
         this.textManager = new TextManager(this, HGC);
       }
 
@@ -328,11 +319,17 @@ export default function BarbellTrack(HGC, ...args) {
     }
 
     initGraphics() {
-      this.rectGraphics = new PIXI.Graphics();
-      this.mouseOverGraphics = new PIXI.Graphics();
+      if (!this.rectGraphics) {
+        this.drawingGraphics = new PIXI.Graphics();
+        this.rectGraphics = new PIXI.Graphics();
+        this.mouseOverGraphics = new PIXI.Graphics();
+  
+        this.drawingGraphics.addChild(this.rectGraphics);
+        this.drawingGraphics.addChild(this.mouseOverGraphics);
 
-      this.pMain.addChild(this.rectGraphics);
-      this.pMain.addChild(this.mouseOverGraphics);
+        this.pMain.addChild(this.drawingGraphics);
+      }
+ 
     }
 
     getMouseOverGraphics() {
@@ -535,7 +532,7 @@ export default function BarbellTrack(HGC, ...args) {
       return errors;
     }
 
-    drawPoly(graphics, xStartPos, xEndPos, rectY, rectHeight, strand) {
+    drawPoly(xStartPos, xEndPos, rectY, rectHeight, strand) {
       let drawnPoly = null;
 
       if (
@@ -563,7 +560,7 @@ export default function BarbellTrack(HGC, ...args) {
           ];
         }
       } else {
-        if (strand === '+') {
+        if (this.options.showDirection && strand === '+') {
           drawnPoly = [
             xStartPos,
             rectY, // left top
@@ -576,7 +573,7 @@ export default function BarbellTrack(HGC, ...args) {
             xStartPos,
             rectY + rectHeight, // left bottom
           ];
-        } else if (strand === '-') {
+        } else if ( this.options.showDirection &&  strand === '-') {
           drawnPoly = [
             xStartPos + rectHeight / 2,
             rectY, // left top
@@ -603,7 +600,6 @@ export default function BarbellTrack(HGC, ...args) {
         }
 
         this.getRectGraphics().drawPolygon(drawnPoly);
-        // this.rectGraphics.hitArea = PIXI.Graphics.Polygon
       }
 
       return drawnPoly;
@@ -678,7 +674,7 @@ export default function BarbellTrack(HGC, ...args) {
           td.fill = td.fill || fill;
 
 
-          renderBarbell(td, this.rectGraphics, this, false, strand);
+          renderBarbell(td, this.rectGraphics, this, strand);
         }
       }
 
@@ -739,8 +735,8 @@ export default function BarbellTrack(HGC, ...args) {
         '-'
       );
 
-      this.pMain.removeChild(oldRectGraphics);
-      this.pMain.addChild(this.rectGraphics);
+      this.drawingGraphics.removeChild(oldRectGraphics);
+      this.drawingGraphics.addChild(this.rectGraphics);
 
       scaleScalableGraphics(this.rectGraphics, this._xScale, this.drawnAtScale);
       scaleScalableGraphics(
@@ -1179,6 +1175,7 @@ BarbellTrack.config = {
       'labelBackgroundOpacity',
       'paddingInner',
       'paddingOuter',
+      'showDirection',
       'showTexts',
       'trackBorderWidth',
       'trackBorderColor',
@@ -1186,6 +1183,21 @@ BarbellTrack.config = {
   defaultOptions: {
     paddingInner: 0,
     paddingOuter: 0,
+    showDirection: false
   },
-  optionsInfo: {},
+  optionsInfo: {
+    showDirection: {
+      name: 'Outline read on hover',
+      inlineOptions: {
+        yes: {
+          value: true,
+          name: 'Yes',
+        },
+        no: {
+          value: false,
+          name: 'No',
+        },
+      },
+    },
+  },
 };
