@@ -116,8 +116,13 @@ export class TextManager {
   }
 
   updateTexts() {
-    if (this.track.options.showTexts) {
-      this.texts = {};
+    this.texts = {};
+
+    if (!this.track.options.showTexts) {
+      this.textGraphics.removeChildren();
+      this.textsList = [];
+      return;
+    }
 
       let yRange = [
         (0 - this.track.vertY) / (this.track.vertK * this.track.prevK),
@@ -131,12 +136,6 @@ export class TextManager {
       const relevantSegments = this.track.uniqueSegments.filter(
         x => !x.yMiddle || (x.yMiddle > yRange[0] && x.yMiddle < yRange[1]),
       );
-
-      // console.log('relevantSegments:', relevantSegments);
-
-      // if (!relevantSegments.length) {
-      //   return;
-      // }
 
       relevantSegments.forEach((td, i) => {
         // don't draw too many texts so they don't bog down the frame rate
@@ -179,6 +178,6 @@ export class TextManager {
         const text = this.textsList.pop();
         this.textGraphics.removeChild(text);
       }
-    }
+    
   }
 }

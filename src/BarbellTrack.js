@@ -30,6 +30,8 @@ const hashFunc = function (s) {
 };
 
 const scaleScalableGraphics = (graphics, xScale, drawnAtScale) => {
+  if (!graphics) return;
+
   const tileK =
     (drawnAtScale.domain()[1] - drawnAtScale.domain()[0]) /
     (xScale.domain()[1] - xScale.domain()[0]);
@@ -108,6 +110,157 @@ export default function BarbellTrack(HGC, ...args) {
     return zoomIdentity.translate(0, t1).scale(k1);
   };
 
+  const renderBarbell = (td, graphics, track, strand) => {
+    const geneInfo = td.fields;
+    let { row, fill } = td;
+
+    // the returned positions are chromosome-based and they need to
+    // be converted to genome-based
+    const xChrOffset = +td.xChrOffset;
+    const yChrOffset = +td.yChrOffset;
+    const xTxStart = +geneInfo[1] + xChrOffset;
+    const xTxEnd = +geneInfo[2] + xChrOffset;
+    const yTxStart = +geneInfo[4] + yChrOffset;
+    const yTxEnd = +geneInfo[5] + yChrOffset;
+    const txMiddle = (xTxStart + yTxEnd) / 2;
+
+    let yMiddle = track.getRowScale(strand)(row) + track.getRowScale(strand).bandwidth() / 2;
+
+    let rectHeight = track.options.annotationHeight || 'scaled';
+
+    if (rectHeight === 'scaled') {
+      rectHeight = track.getRowScale(strand).bandwidth();
+
+      if (track.options.maxAnnotationHeight) {
+        rectHeight = Math.min(rectHeight, +track.options.maxAnnotationHeight);
+      }
+    }
+
+    if (
+      track.options &&
+      track.options.colorEncoding === 'itemRgb' &&
+      td.fields[8]
+    ) {
+      const parts = td.fields[8].split(',');
+
+      if (parts.length === 3) {
+        const color = `rgb(${td.fields[8]})`;
+
+        fill = color;
+      }
+    } else if (track.colorValueScale) {
+      const rgb = valueToColor(
+        track.colorValueScale,
+        track.colorScale,
+        0, // pseudocounts
+        -Number.MIN_VALUE
+      )(+geneInfo[+track.options.colorEncoding - 1]);
+      fill = `rgba(${rgb.join(',')})`;
+    }
+
+    if (track.valueScale) {
+      const value = +geneInfo[+track.options.valueColumn - 1];
+      if (value > this.maxValue) {
+        this.maxValue = value;
+      }
+      yMiddle = track.valueScale(value);
+    }
+
+    const opacity = track.options.fillOpacity || 0.3;
+    const strokeWidth = td.strokeWidth || 1;
+    const strokeColor = td.strokeColor || fill;
+    const strokeOpacity = td.strokeOpacity || opacity;
+
+    graphics.beginFill(colorToHex(fill), opacity);
+    track.getRectGraphics().lineStyle(strokeWidth, colorToHex(strokeColor), strokeOpacity);
+    track.getRectGraphics().beginFill(colorToHex(fill), opacity);
+
+    let rectY = yMiddle - rectHeight / 2;
+    const xStartPos = track._xScale(xTxStart);
+    const xEndPos = track._xScale(xTxEnd);
+
+    const yStartPos = track._xScale(yTxStart);
+    const yEndPos = track._xScale(yTxEnd);
+
+
+    // draw the left end of the barbell
+    const xDrawnPoly = track.drawPoly(
+      xStartPos,
+      xEndPos,
+      rectY * track.prevK,
+      rectHeight * track.prevK,
+      geneInfo[5]
+    );
+
+
+    // draw the middle line connecting the two
+    const mDrawnPoly = track.drawPoly(
+      xEndPos,
+      yStartPos,
+      (rectY + rectHeight / 2) * track.prevK,
+
+      1,
+      null
+    );
+
+    // draw the right end of the barbell
+    const yDrawnPoly = track.drawPoly(
+      yStartPos,
+      yEndPos,
+      rectY * track.prevK,
+      rectHeight * track.prevK,
+      strand
+    );
+
+    track.drawnRects[td.uid + '_x'] = [
+      xDrawnPoly,
+      {
+        start: xTxStart,
+        end: xTxEnd,
+        value: td,
+        fill,
+        strand
+      },
+    ];
+
+    track.drawnRects[td.uid + '_m'] = [
+      mDrawnPoly,
+      {
+        start: xTxEnd,
+        end: yTxStart,
+        value: td,
+        fill,
+        strand
+      },
+    ];
+
+    track.drawnRects[td.uid + '_y'] = [
+      yDrawnPoly,
+      {
+        start: yTxStart,
+        end: yTxEnd,
+        value: td,
+        fill,
+        strand
+      },
+    ];
+
+    if (!track.options.showTexts) {
+      return;
+    }
+
+    // don't draw too many texts so they don't bog down the frame rate
+    if (track.textsDrawn >= (+track.options.maxTexts || MAX_TEXTS)) return;
+
+    track.textsDrawn += 1;
+
+    track.textManager.updateSingleText(
+      td,
+      track._xScale(txMiddle),
+      rectY + rectHeight / 2,
+      td.fields[3]
+    );
+  };
   const clickFunc = (evt, track) => {
     const pos = [
     evt.data.global.x - track.position[0],
@@ -128,28 +281,71 @@ export default function BarbellTrack(HGC, ...args) {
 
       this.valueScaleTransform = zoomIdentity;
 
-      this.textManager = new TextManager(this, HGC);
-
       this.vertY = 0;
       this.vertK = 1;
       this.prevY = 0;
       this.prevK = 1;
+
+      this.initGraphics();
 
       // we're setting these functions to null so that value scale
       // locking doesn't try to get values from them
       this.minRawValue = null;
       this.maxRawValue = null;
 
-      this.rectGraphics = new PIXI.Graphics();
-      this.pMain.addChild(this.rectGraphics);
-      // this.rectGraphics.interactive = true;
-
-      // this.pMain.interactive = true;
-      // this.pMain.mouseover = mousedata => {
-      //   console.log('mouseover', mousedata);
-      // }
-
       this.uniqueSegments = [];
+    }
+
+    getTextManager() {
+      if (!this.textManager) {
+        this.initGraphics();
+        
+        this.textManager = new TextManager(this, HGC);
+      }
+
+      return this.textManager;
+    }
+
+    getRowScale(strand) {
+      if (!this.rowScale) {
+        this.rowScale = {}
+      }
+
+      if (strand) {
+        return this.rowScale[strand];
+      }
+      
+      return this.rowScale;
+    }
+
+    initGraphics() {
+      if (!this.rectGraphics) {
+        this.drawingGraphics = new PIXI.Graphics();
+        this.rectGraphics = new PIXI.Graphics();
+        this.mouseOverGraphics = new PIXI.Graphics();
+  
+        this.drawingGraphics.addChild(this.rectGraphics);
+        this.drawingGraphics.addChild(this.mouseOverGraphics);
+
+        this.pMain.addChild(this.drawingGraphics);
+      }
+ 
+    }
+
+    getMouseOverGraphics() {
+      if (!this.mouseOverGraphics) {
+        this.initGraphics();
+      }
+
+      return this.mouseOverGraphics
+    }
+
+    getRectGraphics() {
+      if (!this.rectGraphics) {
+        this.initGraphics();
+      }
+
+      return this.rectGraphics;
     }
 
     /** Factor out some initialization code for the track. This is
@@ -231,16 +427,12 @@ export default function BarbellTrack(HGC, ...args) {
       this.plusStrandRows = plusStrandRows;
       this.minusStrandRows = minusStrandRows;
 
-      // this.textManager may be null when using local tiles because
-      // the tilesetInfo callback will be called synchronously in the
-      // parent track's constructor
-      if (this.textManager) {
-        this.textManager.updateTexts();
-      }
+      this.getTextManager().updateTexts();
+
       this.render();
 
-      this.rectGraphics.interactive = true;
-      this.rectGraphics.mouseup = e => clickFunc(e, this);
+      this.getRectGraphics().interactive = true;
+      this.getRectGraphics().mouseup = e => clickFunc(e, this);
     }
 
     /** There was a click outside the track so unselect the
@@ -250,27 +442,6 @@ export default function BarbellTrack(HGC, ...args) {
     }
 
     initTile(/* tile */) {}
-
-    /**
-     * Remove the tile's rectangles from the list of drawnRects so that they
-     * can be drawn again.
-     */
-    // removeTileRects(tile) {
-    //   const zoomLevel = +tile.tileId.split('.')[0];
-    //   tile.rectGraphics.clear();
-    //   tile.rendered = false;
-
-    //   if (tile.tileData && tile.tileData.length) {
-    //     tile.tileData.forEach((td, i) => {
-    //       if (this.drawnRects[zoomLevel] && this.drawnRects[zoomLevel][td.uid]) {
-    //         if (this.drawnRects[zoomLevel][td.uid][2] === tile.tileId) {
-    //           // this was the tile that drew that rectangle
-    //           delete this.drawnRects[zoomLevel][td.uid];
-    //         }
-    //       }
-    //     });
-    //   }
-    // }
 
     destroyTile(/* tile */) {}
 
@@ -389,7 +560,7 @@ export default function BarbellTrack(HGC, ...args) {
           ];
         }
       } else {
-        if (strand === '+') {
+        if (this.options.showDirection && strand === '+') {
           drawnPoly = [
             xStartPos,
             rectY, // left top
@@ -402,7 +573,7 @@ export default function BarbellTrack(HGC, ...args) {
             xStartPos,
             rectY + rectHeight, // left bottom
           ];
-        } else if (strand === '-') {
+        } else if ( this.options.showDirection &&  strand === '-') {
           drawnPoly = [
             xStartPos + rectHeight / 2,
             rectY, // left top
@@ -428,8 +599,7 @@ export default function BarbellTrack(HGC, ...args) {
           ];
         }
 
-        this.rectGraphics.drawPolygon(drawnPoly);
-        // this.rectGraphics.hitArea = PIXI.Graphics.Polygon
+        this.getRectGraphics().drawPolygon(drawnPoly);
       }
 
       return drawnPoly;
@@ -482,191 +652,36 @@ export default function BarbellTrack(HGC, ...args) {
       }
     }
 
-    renderRows(rows, maxRows, startY, endY, fill) {
-      let maxValue = Number.MIN_SAFE_INTEGER;
+    renderRows(rows, maxRows, startY, endY, fill, strand) {
+      this.maxValue = Number.MIN_SAFE_INTEGER;
 
       this.initialize();
 
-      const rowScale = scaleBand().domain(range(maxRows)).range([startY, endY])
+      this.getRowScale()[strand] = scaleBand().domain(range(maxRows)).range([startY, endY])
         .paddingInner((this.options && this.options.paddingInner) || 0)
         .paddingOuter((this.options && this.options.paddingOuter) || 0)
       // .paddingOuter(0.2);
       // .paddingInner(0.3)
 
       this.allVisibleRects();
+      this.textsDrawn = 0;
 
       for (let j = 0; j < rows.length; j++) {
         for (let i = 0; i < rows[j].length; i++) {
           // rendered += 1;
           const td = rows[j][i].value;
-          const geneInfo = td.fields;
+          td.row = j;
+          td.fill = td.fill || fill;
 
-          // console.log('td', td);
 
-          // the returned positions are chromosome-based and they need to
-          // be converted to genome-based
-          const xChrOffset = +td.xChrOffset;
-          const yChrOffset = +td.yChrOffset;
-          const xTxStart = +geneInfo[1] + xChrOffset;
-          const xTxEnd = +geneInfo[2] + xChrOffset;
-          const yTxStart = +geneInfo[4] + yChrOffset;
-          const yTxEnd = +geneInfo[5] + yChrOffset;
-          const txMiddle = (xTxStart + yTxEnd) / 2;
-          let yMiddle = rowScale(j) + rowScale.bandwidth() / 2;
-
-          let rectHeight = this.options.annotationHeight || 'scaled';
-
-          if (rectHeight === 'scaled') {
-            rectHeight = rowScale.bandwidth();
-
-            if (this.options.maxAnnotationHeight) {
-              rectHeight = Math.min(
-                rectHeight,
-                +this.options.maxAnnotationHeight
-              );
-            }
-          }
-
-          if (td.fill) {
-
-            fill = td.fill;
-          } else if (
-            this.options &&
-            this.options.colorEncoding === 'itemRgb' &&
-            td.fields[8]
-          ) {
-            const parts = td.fields[8].split(',');
-
-            if (parts.length === 3) {
-              const color = `rgb(${td.fields[8]})`;
-
-              fill = color;
-            }
-          
-
-        } else if (this.colorValueScale) {
-            const rgb = valueToColor(
-              this.colorValueScale,
-              this.colorScale,
-              0, // pseudocounts
-              -Number.MIN_VALUE
-            )(+geneInfo[+this.options.colorEncoding - 1]);
-            fill = `rgba(${rgb.join(',')})`;
-          }
-
-          if (this.valueScale) {
-            const value = +geneInfo[+this.options.valueColumn - 1];
-            if (value > maxValue) {
-              maxValue = value;
-            }
-            yMiddle = this.valueScale(value);
-          }
-
-          const opacity = this.options.fillOpacity || 0.3;
-
-          const strokeWidth = td.strokeWidth || 1;
-          const strokeColor = td.strokeColor || fill;
-          const strokeOpacity = td.strokeOpacity || opacity;
-
-            this.rectGraphics.lineStyle(strokeWidth, colorToHex(strokeColor), strokeOpacity);
-
-          this.rectGraphics.beginFill(colorToHex(fill), opacity);
-
-          let rectY = yMiddle - rectHeight / 2;
-          const xStartPos = this._xScale(xTxStart);
-          const xEndPos = this._xScale(xTxEnd);
-
-          const yStartPos = this._xScale(yTxStart);
-          const yEndPos = this._xScale(yTxEnd);
-
-          // console.log('xStartPos:', xStartPos, xEndPos, yStartPos, yEndPos);
-          // console.log('fill', fill);
-          // console.log('rectHeight:', rectHeight);
-          // console.log('rectY', rectY);
-          // console.log('prevK', this.prevK);
-
-          // draw the left end of the barbell
-          const xDrawnPoly = this.drawPoly(
-            xStartPos,
-            xEndPos,
-            rectY * this.prevK,
-            rectHeight * this.prevK,
-            geneInfo[5]
-          );
-
-          // draw the middle line connecting the two
-          const mDrawnPoly = this.drawPoly(
-            xEndPos,
-            yStartPos,
-            (rectY + rectHeight / 2) * this.prevK,
-
-            1,
-            geneInfo[5]
-          );
-
-          // draw the right end of the barbell
-          const yDrawnPoly = this.drawPoly(
-            yStartPos,
-            yEndPos,
-            rectY * this.prevK,
-            rectHeight * this.prevK,
-            geneInfo[5]
-          );
-
-          this.drawnRects[td.uid + '_x'] = [
-            xDrawnPoly,
-            {
-              start: xTxStart,
-              end: xTxEnd,
-              value: td,
-              fill,
-            },
-          ];
-
-          this.drawnRects[td.uid + '_m'] = [
-            mDrawnPoly,
-            {
-              start: xTxEnd,
-              end: yTxStart,
-              value: td,
-              fill,
-            },
-          ];
-
-          this.drawnRects[td.uid + '_y'] = [
-            yDrawnPoly,
-            {
-              start: yTxStart,
-              end: yTxEnd,
-              value: td,
-              fill,
-            },
-          ];
-
-          td.yMiddle = yMiddle;
-
-          if (!this.options.showTexts) {
-            continue;
-          }
-
-          // don't draw too many texts so they don't bog down the frame rate
-          if (i >= (+this.options.maxTexts || MAX_TEXTS)) continue;
-
-          this.textManager.updateSingleText(
-            td,
-            this._xScale(txMiddle),
-            rectY + rectHeight / 2,
-            td.fields[3]
-          );
+          renderBarbell(td, this.rectGraphics, this, strand);
         }
       }
 
       // this.textManager may be null when using local tiles because
       // the tilesetInfo callback will be called synchronously in the
       // parent track's constructor
-      if (this.textManager) {
-        this.textManager.updateTexts();
-      }
+      this.getTextManager().updateTexts();
     }
 
     render() {
@@ -677,7 +692,7 @@ export default function BarbellTrack(HGC, ...args) {
 
       this.prevVertY = this.vertY;
 
-      const oldRectGraphics = this.rectGraphics;
+      const oldRectGraphics = this.getRectGraphics();
       this.rectGraphics = new PIXI.Graphics();
 
       // store the scale at while the tile was drawn at so that
@@ -708,8 +723,7 @@ export default function BarbellTrack(HGC, ...args) {
         plusHeight = this.dimensions[1];
       }
 
-      // console.log('maxPlusRows:', maxPlusRows);
-      this.renderRows(this.plusStrandRows, maxPlusRows, 0, plusHeight, fill);
+      this.renderRows(this.plusStrandRows, maxPlusRows, 0, plusHeight, fill, '+');
       this.renderRows(
         this.minusStrandRows,
         maxMinusRows,
@@ -717,16 +731,19 @@ export default function BarbellTrack(HGC, ...args) {
           ? plusHeight + MIDDLE_SPACE / 2
           : 0,
         this.dimensions[1],
-        minusStrandFill
+        minusStrandFill,
+        '-'
       );
 
-      this.pMain.removeChild(oldRectGraphics);
-      // this.pMain.removeChild(oldTextGraphics);
-
-      this.pMain.addChild(this.rectGraphics);
-      // this.pMain.addChild(this.textGraphics);
+      this.drawingGraphics.removeChild(oldRectGraphics);
+      this.drawingGraphics.addChild(this.rectGraphics);
 
       scaleScalableGraphics(this.rectGraphics, this._xScale, this.drawnAtScale);
+      scaleScalableGraphics(
+        this.getMouseOverGraphics(),
+        this._xScale,
+        this.drawnAtScale
+      );
       // scaleScalableGraphics(this.textGraphics, this._xScale, this.drawnAtScale);
     }
 
@@ -843,17 +860,17 @@ export default function BarbellTrack(HGC, ...args) {
       // this.textManager may be null when using local tiles because
       // the tilesetInfo callback will be called synchronously in the
       // parent track's constructor
-      if (this.textManager) {
-        this.textManager.startDraw();
-      }
+        this.getTextManager().startDraw();
 
       // these values control vertical scaling and they
       // need to be set in the draw method otherwise when
       // the window is resized, the zoomedY method won't
       // be called
-      // console.log('vertK', this.vertK);
       this.rectGraphics.scale.y = this.vertK;
       this.rectGraphics.position.y = this.vertY;
+
+      this.getMouseOverGraphics().scale.y = this.vertK;
+      this.getMouseOverGraphics().position.y = this.vertY;
 
       // hasn't been rendered yet
       if (!this.drawnAtScale) {
@@ -861,21 +878,32 @@ export default function BarbellTrack(HGC, ...args) {
       }
 
       scaleScalableGraphics(this.rectGraphics, this._xScale, this.drawnAtScale);
+      scaleScalableGraphics(
+        this.getMouseOverGraphics(),
+        this._xScale,
+        this.drawnAtScale
+      );
       // scaleScalableGraphics(this.textGraphics, this._xScale, this.drawnAtScale);
 
       if (this.uniqueSegments && this.uniqueSegments.length) {
         this.uniqueSegments.forEach((td) => {
           const geneInfo = td.fields;
           const geneName = geneInfo[3];
+          const xChrOffset = +td.xChrOffset;
+          const yChrOffset = +td.yChrOffset;
 
-          const xMiddle = this._xScale((td.xStart + td.xEnd) / 2);
-          if (this.textManager && this.textManager.texts[td.uid]) {
+          const xTxStart = +geneInfo[1] + xChrOffset;
+          const yTxEnd = +geneInfo[5] + yChrOffset;
+          const txMiddle = (xTxStart + yTxEnd) / 2;
+
+          const xMiddle = this._xScale(txMiddle);
+          if (this.getTextManager().texts[td.uid]) {
             const yMiddle =
-              this.textManager.texts[td.uid].nominalY *
+              this.getTextManager().texts[td.uid].nominalY *
                 (this.vertK * this.prevK) +
               this.vertY;
 
-            this.textManager.lightUpdateSingleText(td, xMiddle, yMiddle, {
+            this.getTextManager().lightUpdateSingleText(td, xMiddle, yMiddle, {
               importance: td.importance,
               caption: geneName,
               strand: geneInfo[5],
@@ -884,9 +912,7 @@ export default function BarbellTrack(HGC, ...args) {
         });
       }
 
-      if (this.textManager) {
-        this.textManager.hideOverlaps();
-      }
+        this.getTextManager().hideOverlaps();
     }
 
     setPosition(newPosition) {
@@ -966,8 +992,8 @@ export default function BarbellTrack(HGC, ...args) {
 
             gTile.appendChild(r);
 
-            if (this.textManager.texts[td.uid]) {
-              const text = this.textManager.texts[td.uid];
+            if (this.getTextManager().texts[td.uid]) {
+              const text = this.getTextManager().texts[td.uid];
 
               if (!text.visible) {
                 return;
@@ -1015,6 +1041,7 @@ export default function BarbellTrack(HGC, ...args) {
         this.valueScaleTransform = vst.translate(0, dY / k);
       }
       this.rectGraphics.position.y = this.valueScaleTransform.y;
+      this.getMouseOverGraphics().position.y = this.valueScaleTransform.y;
       this.vertY = this.valueScaleTransform.y;
       this.animate();
 
@@ -1035,8 +1062,6 @@ export default function BarbellTrack(HGC, ...args) {
 
       let k1 = newTransform.k;
       const t1 = newTransform.y;
-
-      console.log('k1', k1);
 
       let toStretch = false;
       k1 /= this.prevK;
@@ -1060,6 +1085,9 @@ export default function BarbellTrack(HGC, ...args) {
       this.rectGraphics.scale.y = k1;
       this.rectGraphics.position.y = t1;
 
+      this.getMouseOverGraphics().scale.y = k1;
+      this.getMouseOverGraphics().position.y = t1;
+
       // this.textGraphics.scale.y = k1;
       // this.textGraphics.position.y = t1;
       this.draw();
@@ -1069,6 +1097,7 @@ export default function BarbellTrack(HGC, ...args) {
     getObjectUnderMouse(trackX, trackY) {
       const point = [trackX, trackY];
       const visibleRects = Object.values(this.drawnRects);
+
 
       for (let i = 0; i < visibleRects.length; i++) {
         const rect = visibleRects[i][0].slice(0);
@@ -1082,7 +1111,7 @@ export default function BarbellTrack(HGC, ...args) {
         );
 
         const pc = classifyPoint(newArr, point);
-
+        
         if (pc === -1) {
           return visibleRects[i][1].value;
         }
@@ -1109,6 +1138,10 @@ export default function BarbellTrack(HGC, ...args) {
           return objUnderMouse.mouseOver;
         }
         return objUnderMouse.fields.join(' ');
+      }
+
+      if (this.hovered) {
+        this.hovered = null;
       }
 
       return closestText;
@@ -1142,6 +1175,7 @@ BarbellTrack.config = {
       'labelBackgroundOpacity',
       'paddingInner',
       'paddingOuter',
+      'showDirection',
       'showTexts',
       'trackBorderWidth',
       'trackBorderColor',
@@ -1149,6 +1183,21 @@ BarbellTrack.config = {
   defaultOptions: {
     paddingInner: 0,
     paddingOuter: 0,
+    showDirection: false
   },
-  optionsInfo: {},
+  optionsInfo: {
+    showDirection: {
+      name: 'Outline read on hover',
+      inlineOptions: {
+        yes: {
+          value: true,
+          name: 'Yes',
+        },
+        no: {
+          value: false,
+          name: 'No',
+        },
+      },
+    },
+  },
 };
